@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/deploy.yml'
       - 'docs/**'
       - 'mkdocs.yml'
       - 'requirements.txt'
@@ -35,6 +36,29 @@ jobs:
           python -m pip install -r requirements.txt
           python -m mkdocs build --strict
           test -s site/index.html
+      - name: Ensure deployment tools are available
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+          command -v ssh >/dev/null || missing+=(openssh-client)
+          command -v rsync >/dev/null || missing+=(rsync)
+          if (( ${#missing[@]} )); then
+            echo "Installing missing deployment tools: ${missing[*]}"
+            command -v apt-get >/dev/null || { echo 'apt-get unavailable; install missing tools on runner'; exit 1; }
+            if [[ "$(id -u)" == 0 ]]; then
+              apt-get update
+              apt-get install -y --no-install-recommends "${missing[@]}"
+            elif command -v sudo >/dev/null; then
+              sudo -n apt-get update
+              sudo -n apt-get install -y --no-install-recommends "${missing[@]}"
+            else
+              echo 'Cannot install missing deployment tools on this runner'
+              exit 1
+            fi
+          fi
+          command -v ssh >/dev/null || { echo 'SSH client missing on runner'; exit 1; }
+          command -v rsync >/dev/null || { echo 'rsync missing on runner'; exit 1; }
       - name: Publish static files over SSH
         shell: bash
         env:
@@ -49,16 +73,31 @@ jobs:
           : "${SSH_HOST:?Missing SSH_HOST}" "${SSH_USER:?Missing SSH_USER}"
           : "${SSH_PRIVATE_KEY:?Missing SSH_PRIVATE_KEY}" "${SSH_PORT:?Missing SSH_PORT}"
           : "${SSH_KNOWN_HOSTS:?Missing SSH_KNOWN_HOSTS}" "${DEPLOY_PATH:?Missing DEPLOY_PATH}"
-          [[ "$SSH_PORT" =~ ^[0-9]+$ ]]
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]] && (( 10#$SSH_PORT >= 1 && 10#$SSH_PORT <= 65535 )) || { echo "SSH_PORT must be a number from 1 to 65535"; exit 1; }
           [[ "$DEPLOY_PATH" =~ ^/[A-Za-z0-9._/-]+$ && "$DEPLOY_PATH" != / && "$DEPLOY_PATH" != *..* && "$DEPLOY_PATH" != */public_html && "$DEPLOY_PATH" != */public_html/ ]] || { echo 'Unsafe DEPLOY_PATH'; exit 1; }
-          command -v rsync >/dev/null
+          echo "Deployment configuration validated; preparing SSH"
           tmp=$(mktemp -d)
           trap 'rm -rf -- "$tmp"' EXIT
           umask 077
           printf '%s\n' "$SSH_PRIVATE_KEY" > "$tmp/key"
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$tmp/known_hosts"
-          ssh_cmd="ssh -p $SSH_PORT -i $tmp/key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$tmp/known_hosts -o ConnectTimeout=20"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$tmp/known_hosts"
+          port=$((10#$SSH_PORT))
+          host_lookup="$SSH_HOST"
+          if (( port != 22 )); then
+            host_lookup="[$SSH_HOST]:$port"
+          fi
+          if ! ssh-keygen -F "$host_lookup" -f "$tmp/known_hosts" > "$tmp/matches"; then
+            echo 'SSH_KNOWN_HOSTS contains no matching entry for SSH_HOST and SSH_PORT; check the complete known_hosts line'
+            exit 1
+          fi
+          echo 'Matching host key algorithms (no key material):'
+          awk '!/^#/ && NF >= 3 { if ($1 ~ /^@/) print $3; else print $2 }' "$tmp/matches" | sort -u
+          ssh_cmd="ssh -p $port -i $tmp/key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$tmp/known_hosts -o GlobalKnownHostsFile=/dev/null -o ConnectTimeout=20"
           remote="$SSH_USER@$SSH_HOST"
+          $ssh_cmd "$remote" true || { echo 'SSH connection or authentication failed before checking destination'; exit 1; }
+          echo 'SSH connection verified'
           $ssh_cmd "$remote" "test -d '$DEPLOY_PATH' && test \"\$(cat '$DEPLOY_PATH/.symsvel-deploy-target')\" = 'symsvel-online-doc'" || { echo 'Deployment target marker missing or incorrect'; exit 1; }
+          $ssh_cmd "$remote" "command -v rsync >/dev/null" || { echo "rsync missing or unavailable on remote server"; exit 1; }
+          echo "SSH and deployment target validated; synchronizing static files"
           rsync -az --delete-delay --exclude='/.symsvel-deploy-target' --exclude='/.well-known/' --exclude='/.htaccess' -e "$ssh_cmd" site/ "$remote:$DEPLOY_PATH/"
           $ssh_cmd "$remote" "test -s '$DEPLOY_PATH/index.html'"
