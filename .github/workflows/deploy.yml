@@ -1,0 +1,64 @@
+name: Deploy symsvel-online-doc
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - 'requirements.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: symsvel-online-doc-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Build MkDocs
+        run: |
+          test -s docs/symsvel/index.md || { echo 'Missing generated guides: git add -f docs/symsvel/'; exit 1; }
+          python -m pip install -r requirements.txt
+          python -m mkdocs build --strict
+          test -s site/index.html
+      - name: Publish static files over SSH
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          : "${SSH_HOST:?Missing SSH_HOST}" "${SSH_USER:?Missing SSH_USER}"
+          : "${SSH_PRIVATE_KEY:?Missing SSH_PRIVATE_KEY}" "${SSH_PORT:?Missing SSH_PORT}"
+          : "${SSH_KNOWN_HOSTS:?Missing SSH_KNOWN_HOSTS}" "${DEPLOY_PATH:?Missing DEPLOY_PATH}"
+          [[ "$SSH_PORT" =~ ^[0-9]+$ ]]
+          [[ "$DEPLOY_PATH" =~ ^/[A-Za-z0-9._/-]+$ && "$DEPLOY_PATH" != / && "$DEPLOY_PATH" != *..* && "$DEPLOY_PATH" != */public_html && "$DEPLOY_PATH" != */public_html/ ]] || { echo 'Unsafe DEPLOY_PATH'; exit 1; }
+          command -v rsync >/dev/null
+          tmp=$(mktemp -d)
+          trap 'rm -rf -- "$tmp"' EXIT
+          umask 077
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$tmp/key"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$tmp/known_hosts"
+          ssh_cmd="ssh -p $SSH_PORT -i $tmp/key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$tmp/known_hosts -o ConnectTimeout=20"
+          remote="$SSH_USER@$SSH_HOST"
+          $ssh_cmd "$remote" "test -d '$DEPLOY_PATH' && test \"\$(cat '$DEPLOY_PATH/.symsvel-deploy-target')\" = 'symsvel-online-doc'" || { echo 'Deployment target marker missing or incorrect'; exit 1; }
+          rsync -az --delete-delay --exclude='/.symsvel-deploy-target' --exclude='/.well-known/' --exclude='/.htaccess' -e "$ssh_cmd" site/ "$remote:$DEPLOY_PATH/"
+          $ssh_cmd "$remote" "test -s '$DEPLOY_PATH/index.html'"
