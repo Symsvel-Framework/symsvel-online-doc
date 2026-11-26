@@ -1,9 +1,11 @@
-<!-- symsvel-home: 26db53b2e72158c4fb141f6db37419346451d6f8f8ad8c2d8afbe21d7dbd1ac2 -->
+<!-- symsvel-home: 6208ea5c9ea9afe5921dd30f549d7ac07e699aaf97d6388ec1f5b7ae441956d3 -->
 # Documentation développeur SymSvel
 
 Du premier projet au déploiement : guides pratiques et références pour les composants installés.
 
 **[Parcourir les guides et références SymSvel](symsvel/index.md)**
+
+<aside class="symsvel-welcome" aria-label="Conseil de Zeko"><strong>Un conseil de Zeko :</strong> commencez par la prise en main, puis explorez les modules installés à votre rythme.</aside>
 
 ## Prise en main
 

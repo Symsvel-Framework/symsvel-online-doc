@@ -1,4 +1,4 @@
-# symsvel-layout: 12e25874724968629dd1a93303c0f22dfab073f3a77e4c60b806c4e39216b325
+# symsvel-layout: 102cbb9ec4a7ea0765db4a137482b1fa31b6510f991f07d8da56395be2ee9643
 site_name: SymSvel - Documentation développeur
 site_url: ''
 docs_dir: docs
@@ -8,13 +8,35 @@ theme:
   name: material
   language: fr
   font: false
+  logo: symsvel/assets/theme/mark.png
+  favicon: symsvel/assets/theme/mark.png
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Passer au mode sombre
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Passer au mode clair
   features:
     - toc.follow
     - navigation.top
+    - content.code.copy
 plugins:
   - search
   - offline
+extra_css:
+  - symsvel/assets/theme/symsvel.css
 markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
   - toc:
       title: Sommaire
       permalink: true
