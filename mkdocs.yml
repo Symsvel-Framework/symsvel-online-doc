@@ -1,0 +1,64 @@
+# symsvel-layout: 12e25874724968629dd1a93303c0f22dfab073f3a77e4c60b806c4e39216b325
+site_name: SymSvel - Documentation développeur
+site_url: ''
+docs_dir: docs
+site_dir: site
+use_directory_urls: false
+theme:
+  name: material
+  language: fr
+  font: false
+  features:
+    - toc.follow
+    - navigation.top
+plugins:
+  - search
+  - offline
+markdown_extensions:
+  - toc:
+      title: Sommaire
+      permalink: true
+nav:
+  - Accueil: index.md
+  - Guides SymSvel: symsvel/index.md
+  - "Prise en main":
+      - Vue d’ensemble: "symsvel/01-getting-started/index.md"
+      - "1. Prérequis": "symsvel/01-getting-started/01-prerequis.md"
+      - "Préparer un poste Windows": "symsvel/01-getting-started/01a-windows.md"
+      - "2. Installer la CLI": "symsvel/01-getting-started/02-cli.md"
+      - "3. Créer un projet": "symsvel/01-getting-started/03-creer-un-projet.md"
+      - "4. Configurer le projet en local": "symsvel/01-getting-started/04-setup-local.md"
+      - "5. Premiers pas": "symsvel/01-getting-started/05-premiers-pas.md"
+  - "Développer son application":
+      - Vue d’ensemble: "symsvel/02-development/index.md"
+      - "Développer avec Symfony et Svelte": "symsvel/02-development/01-code-metier.md"
+      - "Créer un module métier": "symsvel/02-development/02-module-metier.md"
+  - "Modules":
+      - Vue d’ensemble: "symsvel/03-modules/index.md"
+      - "Catalogue des modules": "symsvel/03-modules/00-catalogue.md"
+      - "ACLs": "symsvel/03-modules/acls/index.md"
+      - "Admins": "symsvel/03-modules/admins/index.md"
+      - "Auth": "symsvel/03-modules/auth/index.md"
+      - "Countries": "symsvel/03-modules/countries/index.md"
+      - "Languages": "symsvel/03-modules/languages/index.md"
+      - "Mails": "symsvel/03-modules/mails/index.md"
+      - "Roles": "symsvel/03-modules/roles/index.md"
+      - "Settings": "symsvel/03-modules/settings/index.md"
+      - "TwoFactor": "symsvel/03-modules/two-factor/index.md"
+      - "Users": "symsvel/03-modules/users/index.md"
+  - "Mettre à jour son application":
+      - Vue d’ensemble: "symsvel/04-updating/index.md"
+      - "Mettre à jour son application": "symsvel/04-updating/01-mettre-a-jour.md"
+  - "Déployer son application":
+      - Vue d’ensemble: "symsvel/05-deployment/index.md"
+      - "Préparer le déploiement": "symsvel/05-deployment/01-preparer.md"
+      - "Premier Setup en production": "symsvel/05-deployment/02-setup-production.md"
+      - "Livrer les interfaces et maintenir la production": "symsvel/05-deployment/03-livraison.md"
+  - "Références":
+      - Vue d’ensemble: "symsvel/06-reference/index.md"
+      - "Référence CLI": "symsvel/06-reference/01-cli.md"
+      - "Réponses API et origines": "symsvel/06-reference/02-api.md"
+      - "Dépannage": "symsvel/06-reference/03-depannage.md"
+      - "Documentation de votre projet": "symsvel/06-reference/04-documentation.md"
+      - "Développement BO : composants natifs et Design System": "symsvel/06-reference/05-design-system-bo.md"
+      - "Utiliser le client API du BO": "symsvel/06-reference/06-client-api-bo.md"
