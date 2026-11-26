@@ -1,4 +1,4 @@
-# symsvel-layout: 102cbb9ec4a7ea0765db4a137482b1fa31b6510f991f07d8da56395be2ee9643
+# symsvel-layout: 4552c056fc2c6608171595ca09b817710b22efcdcc37f83fb1f123a0f27d34a6
 site_name: SymSvel - Documentation développeur
 site_url: ''
 docs_dir: docs
@@ -42,7 +42,6 @@ markdown_extensions:
       permalink: true
 nav:
   - Accueil: index.md
-  - Guides SymSvel: symsvel/index.md
   - "Prise en main":
       - Vue d’ensemble: "symsvel/01-getting-started/index.md"
       - "1. Prérequis": "symsvel/01-getting-started/01-prerequis.md"
