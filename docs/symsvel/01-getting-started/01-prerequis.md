@@ -8,10 +8,10 @@ SymSvel s'installe sur votre poste de développement, sans Docker obligatoire.
 | --- | --- |
 | macOS | Parcours validé |
 | Linux | Parcours validé |
-| Windows natif | Compatibilité en préparation : [préparer votre poste Windows](01a-windows.md) |
+| Windows natif | Installation initiale avec SQLite validée en CI sur `dev` ; CT indépendant en attente : [préparer votre poste Windows](01a-windows.md) |
 | Windows avec WSL2 | Parcours Linux envisageable, non encore validé sous WSL2 |
 
-Windows natif est la cible ; WSL2 et Docker ne seront pas des prérequis pour ce parcours. Ne confondez pas la disponibilité des outils Windows et la validation de SymSvel.
+Windows natif ne requiert ni WSL2 ni Docker. Pour participer à la qualification, utilisez la CLI `dev` et créez un projet de test avec `--dev` ; le support stable Windows n'est pas encore publié.
 
 ## Outils nécessaires
 
@@ -24,7 +24,7 @@ Windows natif est la cible ; WSL2 et Docker ne seront pas des prérequis pour ce
 | Python 3 | Construction locale de la documentation MkDocs (venv et pip disponibles) |
 | SGBD | PostgreSQL, MySQL, MariaDB ou SQLite |
 
-Installez ces outils avec le gestionnaire de paquets de votre système. Vérifiez que les commandes sont accessibles depuis votre terminal :
+Sous macOS et Linux, installez ces outils avec le gestionnaire de paquets de votre système. Sous Windows, suivez les instructions du [guide Windows](01a-windows.md), notamment pour PHP, le PATH utilisateur, `npm.cmd` et `python`. Vérifiez que les commandes sont accessibles depuis votre terminal (exemples macOS/Linux) :
 
 ~~~bash
 php -v

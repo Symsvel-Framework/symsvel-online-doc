@@ -1,6 +1,6 @@
 # 2. Installer la CLI
 
-Les commandes Bash ci-dessous s'appliquent à macOS et Linux. Sous Windows, consultez d'abord le [parcours Windows](01a-windows.md) : le lanceur et les vérifications natifs ne sont pas encore validés.
+Les commandes Bash ci-dessous s'appliquent à macOS et Linux. Sous Windows, suivez le [parcours Windows](01a-windows.md) pour installer ou mettre à jour la CLI sur `dev`, puis créer un projet de qualification. L'installation initiale SQLite a passé la CI Windows native ; le support stable reste en attente du CT indépendant.
 
 Clonez la CLI officielle sur votre machine, dans un dossier que vous conserverez en dehors de vos projets :
 
