@@ -27,6 +27,19 @@ theme:
     - toc.follow
     - navigation.top
     - content.code.copy
+extra:
+  consent:
+    title: Gestion des cookies
+    description: >-
+      Nous utilisons des cookies pour mesurer l'audience de cette documentation
+      et améliorer votre expérience de lecture.
+    actions:
+      - accept
+      - reject
+      - manage
+  analytics:
+    provider: google
+    property: G-65E049ZCC1
 plugins:
   - search
   - offline
